@@ -12,7 +12,7 @@
 
 -- Conta quante volte è stata prenotata ogni stanza
 
-	SELECT COUNT(`id`)
+	SELECT COUNT(`stanza_id`)
 	FROM `prenotazioni`
 	GROUP BY`stanza_id`
 
@@ -49,8 +49,48 @@
 
 -- Stampare Nome, Cognome, Prezzo e Pagante per tutte le prenotazioni fatte a Maggio 2018
 
+	SELECT ospiti.name AS "nome_ospite",
+	ospiti.lastname AS "cognome_ospite",
+	paganti.name AS "nome_pagante",
+	paganti.lastname AS "cognome_pagante",
+	`price`,
+	prenotazioni.created_at AS "data_prenotazione"
+	FROM `prenotazioni`
+	LEFT JOIN `pagamenti`
+	ON prenotazioni.id = pagamenti.prenotazione_id
+	LEFT JOIN `paganti`
+	ON pagamenti.pagante_id = paganti.id
+	LEFT JOIN `ospiti`
+	ON paganti.ospite_id = ospiti.id
+	WHERE MONTH(prenotazioni.created_at) = 05;
+
 -- Fai la somma di tutti i prezzi delle prenotazioni per le stanze del primo piano
+
+	SELECT SUM(`price`) AS `somma_prezzi`, `floor`
+	FROM `prenotazioni`
+	LEFT JOIN `stanze` 
+	ON prenotazioni.stanza_id = stanze.id
+	LEFT JOIN `pagamenti` 
+	ON prenotazioni.id = pagamenti.prenotazione_id
+	WHERE `floor` = 1;
 
 -- Prendi i dati di fatturazione per la prenotazione con id=7
 
+	SELECT prenotazioni.id, pagamenti.prenotazione_id, pagamenti.price, pagamenti.status, paganti.name, paganti.lastname, paganti.address, paganti.id, ospiti.document_type,
+	ospiti.document_number
+	FROM `prenotazioni` 
+	LEFT JOIN `pagamenti`
+	ON prenotazioni.id = pagamenti.prenotazione_id
+	LEFT JOIN `paganti`
+	ON paganti.id = pagamenti.pagante_id
+	LEFT JOIN `ospiti`
+	ON paganti.ospite_id = ospiti.id
+	WHERE prenotazioni.id = 7
+
 -- Le stanze sono state tutte prenotate almeno una volta? (Visualizzare le stanze non ancora prenotate)
+
+	SELECT stanze.id, prenotazioni.stanza_id
+	FROM `stanze`
+	LEFT JOIN  `prenotazioni`
+	ON  stanze.id = prenotazioni.stanza_id
+	WHERE prenotazioni.stanza_id IS NULL
